@@ -1,17 +1,18 @@
+'''This Modul contains convergent bounding procedures as python functions for use in all other models of this package and beyond.'''
 from pyinterval import interval
 import numpy as np
 from helper import obvec, intvec, obmat
-from typing import Callable
+from typing import Callable, Union
 
-def optimal_centerd_forms(func: Callable[[obvec],float|obvec], grad: Callable[[obvec],obvec|obmat], X: intvec, direction: str="lower") -> obvec:
+def optimal_centerd_forms(func: Callable[[obvec], float], grad: Callable[[obvec],obvec], X: intvec, direction: str="lower") -> obvec:
     """Uses optimal centered forms to return the upper or lower bounds 
-    of the real potentially vector-valued function 'func' on a interval-box 'X' in the form of an object-vector.
+    of the real function 'func' on a interval-box 'X' in the form of an object-vector.
     The arguments have to be a python function 'func', whose bounds are to be determined, 
-    a python function 'grad', which corresponds to the gradient or the first derivative of 'func', 
+    a python function 'grad', which corresponds to the gradient of 'func', 
     and a string 'direction', which specifies the bound (upper or lower) to be determined."""
     def F(X,c):
         return func(c) + grad(X)@(X - c) #np.matmul(grad(X),(X-c), out=np.zeros(1,dtype=object))
-    L = grad(X)
+    L = intvec(grad(X))
     c = [0]*len(X)
     if(direction == "lower"):
         for i in range(len(X)):
@@ -42,7 +43,7 @@ def optimal_centerd_forms(func: Callable[[obvec],float|obvec], grad: Callable[[o
     else:
         raise ValueError("direction "+str(direction)+" is not supported, try 'lower' or 'upper'")
     
-def centerd_forms(func, grad, X, direction="lower"):
+def centerd_forms(func: Callable[[obvec],Union[float,obvec]], grad: Callable[[obvec],Union[obvec,obmat]], X: intvec, direction: str="lower") -> obvec:
     """Uses centered forms to return the upper or lower bounds 
     of the real potentially vector-valued function 'func' on a interval-box 'X' in the form of an object-vector.
     The arguments have to be a python function 'func', whose bounds are to be determined, 
