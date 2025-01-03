@@ -353,6 +353,13 @@ class obmat(tuple):
     T = property(transpose)
 
 class intvec(obvec):
+    """A vector consisting of intervals from the pyinterval package.
+    
+    Providing some helper functions to get the width/ midpoint or to split the representative box of the interval vector.
+        >>> intvec([[1,3],[2,5]]).split()
+        (intvec([interval([1.0, 3.0]),interval([2.0, 3.5])]),
+        intvec([interval([1.0, 3.0]),interval([3.5, 5.0])]))
+    """
 
     def __new__(self,args):
         return obvec.__new__(self,(interval(a) for a in args))
