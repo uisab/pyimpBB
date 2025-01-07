@@ -3,18 +3,19 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatch
 import mpl_toolkits.mplot3d.art3d as art3d
 import numpy as np
+from pyinterval import fpu
 from bounding import centerd_forms
 from helper import obvec,intvec
-from typing import Callable, Union
+from typing import Callable, Union, List, Tuple
 
 def iterations_in_decision_space_plot(func: Callable[[obvec],float],cons: Union[Callable[[obvec],obvec],None],X: intvec,data: dict,iterations: list,columns: int=3,
-                                      title: str="Iterations in decision space", fname: Union[str,None]=None, **args) -> None:
+                                      title: str="Iterations in decision space", fname: Union[str,None]=None,xylim: Union[List[Tuple[float,float]],None]=None, **args) -> None:
     """Generates a tabular representation in which the decision space is shown for given iterations, 
     including level lines of the objective function, zero level lines of the constraints, enclosing box X and associated approximation or decomposition progress.
     The arguments have to be a real objective function 'func', a vector-valued constraint 'cons' (or Python-value: None), 
     a box 'X' surrounding the feasible set, a dictionary containing the corresponding box progress for a given iteration, 
-    a list of iterations to display, an optional number of columns, an optional title of the plot, an optional file name to save the plot 
-    and additional optional parameters to 'plt.figure'."""
+    a list of iterations to display, an optional number of columns, an optional title of the plot, an optional file name to save the plot, 
+    an optional list of 'xy' dimension limits and additional optional parameters to 'plt.figure'."""
 
     rows = -(-len(iterations)//columns)
 
@@ -40,11 +41,17 @@ def iterations_in_decision_space_plot(func: Callable[[obvec],float],cons: Union[
             x_2 = [B[1][0].inf,B[1][0].inf,B[1][0].sup,B[1][0].sup]
             ax.fill(x_1,x_2,alpha=0.5,color="darkorange")
 
-        ax.set_xlim((X[0][0].inf -0.5,X[0][0].sup +0.5))
-        ax.set_ylim((X[1][0].inf -0.5,X[1][0].sup +0.5))
+        if xylim:
+            ax.set_xlim(xylim[0])
+            ax.set_ylim(xylim[1])
+            ax.plot(xylim[0],[0,0],color="black")
+            ax.plot([0,0],xylim[1],color="black")
+        else:
+            ax.set_xlim((X[0][0].inf -0.5,X[0][0].sup +0.5))
+            ax.set_ylim((X[1][0].inf -0.5,X[1][0].sup +0.5))
+            ax.plot((X[0][0].inf -0.5,X[0][0].sup +0.5),[0,0],color="black")
+            ax.plot([0,0],(X[1][0].inf -0.5,X[1][0].sup +0.5),color="black")
         ax.grid(color="lightgray")
-        ax.plot((X[0][0].inf -0.5,X[0][0].sup +0.5),[0,0],color="black")
-        ax.plot([0,0],(X[1][0].inf -0.5,X[1][0].sup +0.5),color="black")
         ax.set_xlabel("$x_1$")
         ax.set_ylabel("$x_2$")
         ax.set_title("View of the decision space in Iteration "+str(k))
@@ -60,18 +67,28 @@ def iterations_in_decision_space_plot(func: Callable[[obvec],float],cons: Union[
     plt.show()
 
 def iterations_in_objective_space_plot(func: Callable[[obvec],float],grad: Callable[[obvec],obvec],cons: Union[Callable[[obvec],obvec],None],X: intvec,data: dict,iterations: list,columns: int=3,
-                                       title: str='Iterations in objective space',dspace: bool=True,fname: Union[str,None]=None,**args) -> None:
+                                       title: str='Iterations in objective space',dspace: bool=True,fname: Union[str,None]=None,xyzlim: Union[List[Tuple[float,float]],None]=None, **args) -> None:
     """Generates a tabular representation in which the objective space is shown for given iterations, 
     including the surface of the objective function, the associated optimal value approximation progress and optionally the decision space.
-    The arguments have to be a real objective function 'func' with associated gradient 'grad', a vector-valued constraint 'cons' (or Python-value: None), 
+    The arguments have to be a real objective function 'func' with associated gradient 'grad' (or Python-value: None), a vector-valued constraint 'cons' (or Python-value: None), 
     a box 'X' surrounding the feasible set, a dictionary containing the corresponding box progress for a given iteration, 
     a list of iterations to display, an optional number of columns, an optional title of the plot, an optional flag for plotting the decision space 'dspace', 
-    an optional file name to save the plot and additional optional parameters to 'plt.figure'."""
+    an optional file name to save the plot, an optional list of 'xyz'-dimension limits and additional optional parameters to 'plt.figure'."""
     
     rows = -(-len(iterations)//columns)
-    lb_f = centerd_forms(func,grad,X,direction="lower")[0]
-    ub_f = centerd_forms(func,grad,X,direction="upper")[0]
-    
+    if not xyzlim:
+        if callable(grad):
+            lb_f, ub_f = centerd_forms(func,grad,X,direction="lower")[0], centerd_forms(func,grad,X,direction="upper")[0]
+        else:
+            lb_f, ub_f = -fpu.infinity, fpu.infinity
+        if lb_f == -fpu.infinity or ub_f == fpu.infinity:
+            testvalues = [X.midpoint(),obvec([X[0][0].inf,X[1][0].inf]),obvec([X[0][0].sup,X[1][0].inf]),obvec([X[0][0].sup,X[1][0].sup]),obvec([X[0][0].inf,X[1][0].sup])]
+            lb_f, ub_f = min(func(tv) for tv in testvalues), max(func(tv) for tv in testvalues) #func(X.midpoint())-X.width(),func(X.midpoint)+X.width()
+        if dspace & (lb_f > 0):
+            lb_f = 0
+        elif dspace & (ub_f < 0):
+            ub_f = 0
+
     fig = plt.figure(**args,layout="constrained")
     fig.suptitle(title,fontsize="x-large")
     fig.supxlabel(" ")
@@ -103,13 +120,21 @@ def iterations_in_objective_space_plot(func: Callable[[obvec],float],grad: Calla
             ax.add_patch(Box_B_h)
             art3d.pathpatch_2d_to_3d(Box_B_h, z=func(B.midpoint()), zdir="z")
 
-        ax.set_xlim((X[0][0].inf -0.5,X[0][0].sup +0.5))
-        ax.set_ylim((X[1][0].inf -0.5,X[1][0].sup +0.5))
-        ax.set_zlim((lb_f,ub_f))
+        if xyzlim:
+            ax.set_xlim(xyzlim[0]) 
+            ax.set_ylim(xyzlim[1])
+            ax.set_zlim(xyzlim[2])
+            ax.plot(xyzlim[0],[0,0],[0,0],color="black")
+            ax.plot([0,0],xyzlim[1],[0,0],color="black")
+            ax.plot([0,0],[0,0],xyzlim[2],color="black")
+        else:
+            ax.set_xlim((X[0][0].inf -0.5,X[0][0].sup +0.5))
+            ax.set_ylim((X[1][0].inf -0.5,X[1][0].sup +0.5))
+            ax.set_zlim((lb_f -0.5,ub_f +0.5))
+            ax.plot((X[0][0].inf -0.5,X[0][0].sup +0.5),[0,0],[0,0],color="black")
+            ax.plot([0,0],(X[1][0].inf -0.5,X[1][0].sup +0.5),[0,0],color="black")
+            ax.plot([0,0],[0,0],(lb_f -0.5,ub_f +0.5),color="black")
         ax.grid(color="lightgray")
-        ax.plot((X[0][0].inf -0.5,X[0][0].sup +0.5),[0,0],[0,0],color="black")
-        ax.plot([0,0],(X[1][0].inf -0.5,X[1][0].sup +0.5),[0,0],color="black")
-        ax.plot([0,0],[0,0],(lb_f,ub_f),color="black")
         ax.set_xlabel("$x_1$")
         ax.set_ylabel("$x_2$")
         ax.set_zlabel("$z$")

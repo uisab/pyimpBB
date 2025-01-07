@@ -1,7 +1,9 @@
 '''This Modul contains helper classes and functions for use in all other models of this package and beyond.'''
 import numpy as np
-from pyinterval import interval
+from pyinterval import interval, imath
 
+#helper classes
+#-------------------------------------------------------------------------------------------------------------
 def vecoperator(func):
     def wrapper(self,other):
         if isinstance(other,obvec):
@@ -389,3 +391,29 @@ class intvec(obvec):
     @property
     def sup(self):
         return obvec(s[-1].sup for s in self)
+
+#helper functions
+#-------------------------------------------------------------------------------------------------------------
+def exp(x):
+    """Refers to the corresponding mathematical function matching the input type."""
+    return imath.exp(x) if isinstance(x,interval) else np.exp(x)
+
+def log(x):
+    """Refers to the corresponding mathematical function matching the input type."""
+    return imath.log(x) if isinstance(x,interval) else np.log(x)
+
+def sin(x):
+    """Refers to the corresponding mathematical function matching the input type."""
+    return imath.sin(x) if isinstance(x,interval) else np.sin(x)
+
+def cos(x):
+    """Refers to the corresponding mathematical function matching the input type."""
+    return imath.cos(x) if isinstance(x,interval) else np.cos(x)
+
+def tan(x):
+    """Refers to the corresponding mathematical function matching the input type."""
+    return imath.tan(x) if isinstance(x,interval) else np.tan(x)
+
+def sqrt(x):
+    """Refers to the corresponding mathematical function matching the input type."""
+    return imath.sqrt(x) if isinstance(x,interval) else np.sqrt(x)

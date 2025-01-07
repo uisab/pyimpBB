@@ -5,12 +5,14 @@ from helper import obvec,obmat,intvec
 from typing import Callable, Tuple
 
 def improved_BandB(func: Callable[[obvec],float], grad: Callable[[obvec],obvec], cons: Callable[[obvec],obvec], cons_div: Callable[[obvec],obmat], X: intvec, 
-                   bounding_procedure: Callable[[Callable[[obvec], float], Callable[[obvec],obvec], intvec, str],obvec], epsilon: float = 0, delta: float = 0, epsilon_max: float = 0.0001, delta_max: float = 0.0001) -> Tuple[list,int,dict]:
+                   bounding_procedure: Callable[[Callable[[obvec], float], Callable[[obvec],obvec], intvec, str],obvec], epsilon: float = 0, delta: float = 0, 
+                   epsilon_max: float = 0.5, delta_max: float = 0.5, k_max: int = 2500) -> Tuple[list,int,dict]:
     """Uses the improvement function in the course of a branch-and-bound approach to provide an enclosure of the solution set with a given accuracy. 
     The arguments have to be a real objective function 'func' with associated gradient 'grad', a vector-valued constraint 'cons' with associated derivative 'cons_div', 
     a box 'X' surrounding the feasible set, a convergent bounding procedure 'bounding_procedure' to be used, an optimality accuracy 'epsilon', 
-    a feasibility accuracy 'delta' and the respective enclosure accuracies 'epsilon_max' and 'delta_max'. The output corresponds to a three-tuple consisting of 
-    a list of boxes 'O', whose union forms a superset of the solution set, the iteration number of the algorithm 'k' and the intermediate steps per iteration 'save'."""
+    a feasibility accuracy 'delta', the respective enclosure accuracies 'epsilon_max' and 'delta_max' and the maximum number of iterations 'k_max'. 
+    The output corresponds to a three-tuple consisting of a list of boxes 'O', whose union forms a superset of the solution set, 
+    the iteration number of the algorithm 'k' and the intermediate steps per iteration 'save'."""
     
     def bounding_omega(X,direct):
         return max((bounding_procedure(lambda x: cons(x)[i],lambda x: cons_div(x).T[i],X,direction=direct)[0] for i in range(len(cons(X)))))
@@ -28,7 +30,7 @@ def improved_BandB(func: Callable[[obvec],float], grad: Callable[[obvec],obvec],
     O,L = [(X,-np.inf,np.inf)],[(X,lb_omega_Y,lb_f_Y)]
 
     O_to_split = O #[Oi for Oi in O if (Oi[1] < 0 or Oi[2] > delta_max)]
-    while any(O_to_split):
+    while any(O_to_split) and k < k_max:
         X1_X2 = O_to_split[0][0].split() #wähle X des ersten Elements in O_to_split
         O.remove(O_to_split[0])
 
