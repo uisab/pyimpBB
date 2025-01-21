@@ -27,12 +27,15 @@ def improved_BandB(func: Callable[[obvec],float], grad: Callable[[obvec],obvec],
     save = {0:([(X,-np.inf,np.inf)],[(X,lb_omega_Y,lb_f_Y)])}
     #end
     
-    O,L = [(X,-np.inf,np.inf)],[(X,lb_omega_Y,lb_f_Y)]
+    O,L = [],[(X,lb_omega_Y,lb_f_Y)]
 
-    O_to_split = O #[Oi for Oi in O if (Oi[1] < 0 or Oi[2] > delta_max)]
-    while any(O_to_split) and k < k_max:
-        X1_X2 = O_to_split[0][0].split() #wähle X des ersten Elements in O_to_split
-        O.remove(O_to_split[0])
+    O_to_split = [(X,-np.inf,np.inf)]
+    while O_to_split and k < k_max:
+        
+        Oi = O_to_split[0] #Breitensuche alternativ auch mit O_next dann aber save je iteration nicht möglich
+        del O_to_split[0]
+        #Oi = O_to_split.pop() #Tiefensuche ohne for-Schleife  
+        X1_X2 = Oi[0].split()
 
         for Xi in X1_X2:
             l_omega_X = bounding_omega(Xi,"lower")
@@ -51,7 +54,10 @@ def improved_BandB(func: Callable[[obvec],float], grad: Callable[[obvec],obvec],
                     
                     gamma_X = max(L_argmin_emax[1],L_argmin_emax[2] -ub_f +epsilon_max)
                     delta_X = bounding_omega(Xi,"upper")
-                    O.append((Xi,gamma_X,delta_X))
+                    if gamma_X < 0 or delta_X > delta_max:
+                        O_to_split.append((Xi,gamma_X,delta_X))
+                    else:
+                        O.append((Xi,gamma_X,delta_X))
                     
                     if id(L_argmin_e) == id(L_argmin_emax):
                         Y1,Y2 = L_argmin_e[0].split()
@@ -60,7 +66,7 @@ def improved_BandB(func: Callable[[obvec],float], grad: Callable[[obvec],obvec],
                         lb_f_Y1 = bounding_procedure(func,grad,Y1,direction="lower")[0]
                         lb_f_Y2 = bounding_procedure(func,grad,Y2,direction="lower")[0]
                         
-                        L.remove(L_argmin_e)
+                        L = [Li for Li in L if id(Li) != id(L_argmin_e)]
                         L.extend([(Y1,lb_omega_Y1,lb_f_Y1),(Y2,lb_omega_Y2,lb_f_Y2)])
                     else:
                         Y1_e,Y2_e = L_argmin_e[0].split()
@@ -75,17 +81,88 @@ def improved_BandB(func: Callable[[obvec],float], grad: Callable[[obvec],obvec],
                         lb_f_Y1_emax = bounding_procedure(func,grad,Y1_emax,direction="lower")[0]
                         lb_f_Y2_emax = bounding_procedure(func,grad,Y2_emax,direction="lower")[0]
 
-                        L.remove(L_argmin_e)
-                        L.extend([(Y1_e,lb_omega_Y1_e,lb_f_Y1_e),(Y2_e,lb_omega_Y2_e,lb_f_Y2_e)])
-
-                        L.remove(L_argmin_emax)
-                        L.extend([(Y1_emax,lb_omega_Y1_emax,lb_f_Y1_emax),(Y2_emax,lb_omega_Y2_emax,lb_f_Y2_emax)])
-        
-        O_to_split = [Oi for Oi in O if (Oi[1] < 0 or Oi[2] > delta_max)]
+                        L = [Li for Li in L if (id(Li) != id(L_argmin_e) and id(Li) != id(L_argmin_emax))]
+                        L.extend([(Y1_e,lb_omega_Y1_e,lb_f_Y1_e),(Y2_e,lb_omega_Y2_e,lb_f_Y2_e),(Y1_emax,lb_omega_Y1_emax,lb_f_Y1_emax),(Y2_emax,lb_omega_Y2_emax,lb_f_Y2_emax)])
 
         #info zusatz
         k += 1
-        save[k] = (O.copy(),L.copy())
+        O_iter = O.copy()
+        O_iter.extend(O_to_split)
+        save[k] = (O_iter,L.copy())
+
+    #file = open(data_loc,"wb")
+    #pickle.dump(save, file)
+    #file.close()
+    #end
+
+    return O ,k ,save
+
+def improved_boxres_BandB(func: Callable[[obvec],float], grad: Callable[[obvec],obvec], X: intvec, bounding_procedure: Callable[[Callable[[obvec], float], Callable[[obvec],obvec], intvec, str],obvec], 
+                          epsilon: float = 0, epsilon_max: float = 0.5, k_max: int = 2500) -> Tuple[list,int,dict]:
+    """Uses the improvement function in the course of a branch-and-bound approach to provide an enclosure of the solution set with a given accuracy. 
+    The arguments have to be a real objective function 'func' with associated gradient 'grad', a box 'X' surrounding the feasible set, a convergent bounding procedure 'bounding_procedure' to be used, 
+    an optimality accuracy 'epsilon', the respective enclosure accuracies 'epsilon_max' and the maximum number of iterations 'k_max'. 
+    The output corresponds to a three-tuple consisting of a list of boxes 'O', whose union forms a superset of the solution set, 
+    the iteration number of the algorithm 'k' and the intermediate steps per iteration 'save'."""
+    
+    lb_f_Y = bounding_procedure(func,grad,X,direction="lower")[0]
+    
+    #info zusatz
+    k = 0
+    save = {0:([(X,-np.inf,np.inf)],[(X,lb_f_Y)])}
+    #end
+    
+    O,L = [],[(X,lb_f_Y)]
+
+    O_to_split = [(X,-np.inf,np.inf)]
+    while O_to_split and k < k_max:
+        
+        Oi = O_to_split[0] #Breitensuche alternativ auch mit O_next dann aber save je iteration nicht möglich
+        del O_to_split[0]
+        #Oi = O_to_split.pop() #Tiefensuche ohne for-Schleife  
+        X1_X2 = Oi[0].split()
+
+        for Xi in X1_X2:
+            ub_f = bounding_procedure(func,grad,Xi,direction="upper")[0]
+            L_argmin_e = min(L, key= lambda Li: Li[1] -ub_f +epsilon)
+            
+            y_mid = L_argmin_e[0].midpoint()
+            
+            ub_psi_e = func(y_mid)-bounding_procedure(func,grad,Xi,direction="lower")[0] +epsilon
+            
+            if not ub_psi_e < 0:
+                L_argmin_emax = min(L, key= lambda Li: Li[1] -ub_f +epsilon_max)
+
+                gamma_X = L_argmin_emax[1] -ub_f +epsilon_max
+                if gamma_X < 0:
+                    O_to_split.append((Xi,gamma_X))
+                else:
+                    O.append((Xi,gamma_X))
+                
+                if id(L_argmin_e) == id(L_argmin_emax):
+                    Y1,Y2 = L_argmin_e[0].split()
+                    lb_f_Y1 = bounding_procedure(func,grad,Y1,direction="lower")[0]
+                    lb_f_Y2 = bounding_procedure(func,grad,Y2,direction="lower")[0]
+                    
+                    L = [Li for Li in L if id(Li) != id(L_argmin_e)]
+                    L.extend([(Y1,lb_f_Y1),(Y2,lb_f_Y2)])
+                else:
+                    Y1_e,Y2_e = L_argmin_e[0].split()
+                    lb_f_Y1_e = bounding_procedure(func,grad,Y1_e,direction="lower")[0]
+                    lb_f_Y2_e = bounding_procedure(func,grad,Y2_e,direction="lower")[0]
+
+                    Y1_emax,Y2_emax = L_argmin_emax[0].split()
+                    lb_f_Y1_emax = bounding_procedure(func,grad,Y1_emax,direction="lower")[0]
+                    lb_f_Y2_emax = bounding_procedure(func,grad,Y2_emax,direction="lower")[0]
+
+                    L = [Li for Li in L if (id(Li) != id(L_argmin_e) and id(Li) != id(L_argmin_emax))]
+                    L.extend([(Y1_e,lb_f_Y1_e),(Y2_e,lb_f_Y2_e),(Y1_emax,lb_f_Y1_emax),(Y2_emax,lb_f_Y2_emax)])
+
+        #info zusatz
+        k += 1
+        O_iter = O.copy()
+        O_iter.extend(O_to_split)
+        save[k] = (O_iter,L.copy())
 
     #file = open(data_loc,"wb")
     #pickle.dump(save, file)
