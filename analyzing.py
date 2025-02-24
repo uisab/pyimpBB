@@ -9,15 +9,14 @@ from bounding import centerd_forms
 from helper import obvec,intvec
 from typing import Callable, Union, List, Tuple
 
-def iterations_in_decision_space_plot(func: Callable[[obvec],float],cons: Union[Callable[[obvec],obvec],None],X: intvec,data: dict,iterations: list,title: str="Iterations in decision space",
+def iterations_in_decision_space_plot(func: Callable[[obvec],float],X: intvec,data: dict,iterations: list,cons: Union[List[Callable[[obvec],float]],None]=None,title: str="Iterations in decision space",
                                       fname: Union[str,None]=None,columns: int=3,levels: Union[int,List[float],None]=None,mgres:int = 100,xylim: Union[List[Tuple[float,float]],None]=None, **args) -> None:
     """Generates a tabular representation in which the decision space is shown for given iterations, 
     including level lines of the objective function, zero level lines of the constraints, enclosing box X and associated approximation or decomposition progress.
-    The arguments have to be a real objective function 'func', a vector-valued constraint 'cons' (or Python-value: None), 
-    a box 'X' surrounding the feasible set, a dictionary containing the corresponding box progress for a given iteration, 
-    a list of iterations to display, an optional title of the plot, an optional file name to save the plot, an optional number of columns,
-    an optional numper or list of specified levels for the contour plot of 'func', an optional value for the meshgrid resolution, an optional list of 'xy' dimension limits 
-    and additional optional parameters to 'plt.figure'."""
+    The arguments have to be a python function 'func', which correspond to the real objective function, a intvec 'X' bounding and/or surrounding the feasible set, 
+    a dictionary 'data' containing the corresponding box progress for a given iteration, a list of iterations to display, a optional list of python functions 'cons', which correspond to the constraints, 
+    an optional title of the plot, an optional file name to save the plot, an optional number of columns, an optional numper or list of specified levels for the contour plot of 'func', 
+    an optional value 'mgres' for the meshgrid resolution, an optional list of 'xy' dimension limits 'xylim' and additional optional parameters to 'plt.figure'."""
 
     rows = -(-len(iterations)//columns)
 
@@ -25,8 +24,8 @@ def iterations_in_decision_space_plot(func: Callable[[obvec],float],cons: Union[
         xylim = [(X[0][0].inf -0.5,X[0][0].sup +0.5),(X[1][0].inf -0.5,X[1][0].sup +0.5)]
     
     X_1, X_2 = np.meshgrid(np.linspace(xylim[0][0],xylim[0][1],round(xylim[0][1] - xylim[0][0])*mgres),np.linspace(xylim[1][0],xylim[1][1],round(xylim[1][1] - xylim[1][0])*mgres))
-    if callable(cons):
-        cons_eval = cons((X_1,X_2))
+    if cons:
+        cons_eval = np.array([cons_i((X_1,X_2)) for cons_i in cons])
         fis_test = np.ones(shape=X_1.shape).astype(bool)
         for cons_bool in (cons_eval <= 0):
             fis_test = fis_test & cons_bool
@@ -40,7 +39,7 @@ def iterations_in_decision_space_plot(func: Callable[[obvec],float],cons: Union[
 
         ax.fill([X[0][0].inf,X[0][0].sup,X[0][0].sup,X[0][0].inf],[X[1][0].inf,X[1][0].inf,X[1][0].sup,X[1][0].sup],alpha=0.5, color="lightblue")
 
-        if callable(cons):
+        if cons:
             for Z in cons_eval:
                 ax.contour(X_1,X_2,Z,levels=[0],colors="purple")
 
@@ -84,19 +83,19 @@ color_array[:,-1] = np.linspace(0.0,0.75,ncolors)
 map_object = LinearSegmentedColormap.from_list(name='purple_alpha',colors=color_array)
 plt.colormaps.register(cmap=map_object)
 
-def iterations_in_objective_space_plot(func: Callable[[obvec],float],grad: Union[Callable[[obvec],obvec],None],cons: Union[Callable[[obvec],obvec],None],X: intvec,data: dict,iterations: list,title: str='Iterations in objective space',
-                                       columns: int=3,dspace: bool=True,fname: Union[str,None]=None,mgres:int = 100,xyzlim: Union[List[Tuple[float,float]],None]=None, **args) -> None:
+def iterations_in_objective_space_plot(func: Callable[[obvec],float],X: intvec,data: dict,iterations: list,grad: Union[Callable[[obvec],obvec],None]=None,cons: Union[List[Callable[[obvec],float]],None]=None,
+                                       title: str='Iterations in objective space',fname: Union[str,None]=None,columns: int=3,dspace: bool=True,mgres:int = 100,xyzlim: Union[List[Tuple[float,float]],None]=None, **args) -> None:
     """Generates a tabular representation in which the objective space is shown for given iterations, 
     including the surface of the objective function, the associated optimal value approximation progress and optionally the decision space.
-    The arguments have to be a real objective function 'func' with associated gradient 'grad' (or Python-value: None), a vector-valued constraint 'cons' (or Python-value: None), 
-    a box 'X' surrounding the feasible set, a dictionary containing the corresponding box progress for a given iteration, 
-    a list of iterations to display, an optional title of the plot, an optional number of columns, an optional flag for plotting the decision space 'dspace', 
-    an optional file name to save the plot, an optional value for the meshgrid resolution, an optional list of 'xyz'-dimension limits and additional optional parameters to 'plt.figure'."""
+    The arguments have to be up to two python functions 'func' and 'grad',which correspond to the real objective function with associated gradient, a intvec 'X' bounding and/or surrounding the feasible set, 
+    a dictionary 'data' containing the corresponding box progress for a given iteration, a list of iterations to display, a optional list of python functions 'cons', which correspond to the constraints, 
+    an optional title of the plot, an optional file name to save the plot, an optional number of columns, an optional flag for plotting the decision space 'dspace', 
+    an optional value 'mgres' for the meshgrid resolution, an optional list of 'xyz' dimension limits 'xyzlim' and additional optional parameters to 'plt.figure'."""
     
     rows = -(-len(iterations)//columns)
     if not xyzlim:
-        if callable(grad):
-            lb_f, ub_f = centerd_forms(func,grad,X,direction="lower")[0], centerd_forms(func,grad,X,direction="upper")[0]
+        if grad:
+            lb_f, ub_f = centerd_forms(func,grad,None,X,direction="lower")[0], centerd_forms(func,grad,None,X,direction="upper")[0]
         else:
             lb_f, ub_f = -fpu.infinity, fpu.infinity
         if lb_f == -fpu.infinity or ub_f == fpu.infinity:
@@ -109,8 +108,8 @@ def iterations_in_objective_space_plot(func: Callable[[obvec],float],grad: Union
         xyzlim = [(X[0][0].inf -0.5,X[0][0].sup +0.5),(X[1][0].inf -0.5,X[1][0].sup +0.5),(lb_f,ub_f)]
 
     X_1, X_2 = np.meshgrid(np.linspace(xyzlim[0][0],xyzlim[0][1],round(xyzlim[0][1] - xyzlim[0][0])*mgres),np.linspace(xyzlim[1][0],xyzlim[1][1],round(xyzlim[1][1] - xyzlim[1][0])*mgres))
-    if callable(cons):
-        cons_eval = cons((X_1,X_2))
+    if cons:
+        cons_eval = np.array([cons_i((X_1,X_2)) for cons_i in cons])
         fis_test = np.ones(shape=X_1.shape).astype(bool)
         for cons_bool in (cons_eval <= 0):
             fis_test = fis_test & cons_bool
@@ -128,7 +127,7 @@ def iterations_in_objective_space_plot(func: Callable[[obvec],float],grad: Union
             ax.add_patch(Box_X)
             art3d.pathpatch_2d_to_3d(Box_X, z=0, zdir="z")
 
-            if callable(cons):
+            if cons:
                 for Z in cons_eval:
                     ax.contour(X_1,X_2,Z,levels=[0],colors="purple")
 
