@@ -120,13 +120,17 @@ use <kbd>help(<module/class/function name>)</kbd>.
 ## Application:
 The use of this package will be shown and explained using a simple example. To do this, consider the optimization 
 problem of the form
+
 $$\min_x f(x) \quad s.t. \quad \omega(x) = \max\lbrace \omega_1(x), \ldots, \omega_4(x) \rbrace \leq 0,\quad\negthickspace x \in X$$
+
 with nonempty box $X := ([0,3],[0,3])^\intercal \subseteq \mathbb{I}\negthinspace\mathbb{R}^2$ and continuously 
 differentiable functions $f,\omega_i: \mathbb{R}^2 \rightarrow \mathbb{R}, i \in \lbrace 1, \ldots, 4\rbrace$ 
 defined as
+
 $$f(x) := x_1 + x_2,$$ 
 $$\omega_1(x) := -(x_1^2 + x_2^2) +4, \quad \omega_3(x) := x_1 -x_2 -2,$$
 $$\omega_2(x) := -x_1 +x_2 -2, \qquad\negthickspace \omega_4(x) := x_1^2 +x_2^2 -9.$$
+
 This example problem should now be solved using the algorithm provided by this package and then analyzed using 
 the representation functions also provided. To do this, it can first be modeled as follows using the class 
 <kbd>intvec</kbd> from the module <kbd>pyimpBB.helper</kbd>.
