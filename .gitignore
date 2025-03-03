@@ -2,3 +2,7 @@
 /ProbeNB.ipynb
 /outdated.ipynb
 /HelperNB.ipynb
+/build
+/dist
+*.egg-info
+*__pycache__
