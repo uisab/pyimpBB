@@ -1,6 +1,6 @@
 '''This Modul contains helper classes and functions for use in all other models of this package and beyond.'''
 import numpy as np
-from pyinterval import interval, imath
+from interval import interval, imath
 
 #helper classes
 #-------------------------------------------------------------------------------------------------------------
@@ -24,18 +24,22 @@ class obvec(tuple):
 
     An object-vector is an immutable object that is created by specifying 
     its components:
+
         >>> obvec([O1,O2,O3])
         obvec([O1,O2,O3])
 
     constructs an object-vector whose entries are references to the objects Oi, where i corresponds to the row. 
     Casting into and back from ndarray from the numpy package is supported:
+
         >>> numpy.array(obvec(numpy.array([1,4,3])))
         array([1, 4, 3])
     
     All base operations on object-vectors are assigned to the entries in a vector-like manner. 
     In addition, some vector operations known from the numpy package, such as dot product or transpose, are implemented.
+
         >>> (1 + obvec([2,4])) / obvec([-1,2]) @ obvec([3,1])
         -6.5
+
     """
 
     #Unary operators and functions
@@ -186,18 +190,22 @@ class obmat(tuple):
 
     An object-matrix is an immutable object that is created by specifying 
     its components column-wise:
+
         >>> obmat([[O11,O21],[O12,O22],[O13,O23]])
         obmat([obvec([O11,O21]),obvec([O12,O22]),obvec([O13,O23])])
 
     constructs an object matrix whose entries are references to the objects Oij, where i corresponds to the row and j to the column. 
     Casting into and back from ndarray from the numpy package is supported:
+
         >>> numpy.array(obmat(numpy.array([[1,4],[7,3]])))
         array([[1, 4],[7, 3]])
     
     All base operations on object-matrix are assigned to the entries in a matrix-like manner. 
     In addition, some matrix operations known from the numpy package, such as matrix product or transpose, are implemented.
+
         >>> (1 + obmat([[2,4],[7,5]])) / obmat([[1,2],[4,3]]) @ obmat([[1,3],[5,1]])
         obmat([obvec([9.0,8.5]),obvec([17.0,14.5])])
+
     """
 
     def __new__(self,args):
@@ -354,13 +362,21 @@ class obmat(tuple):
     
     T = property(transpose)
 
+class interval(interval):
+    @property
+    def width(self):
+        """The interval consisting only of the width of each component."""
+        return self.new(self.Component(x,x) for x in (c.sup - c.inf for c in self))
+
 class intvec(obvec):
     """A vector consisting of intervals from the pyinterval package.
     
     Providing some helper functions to get the width/ midpoint or to split the representative box of the interval vector.
+
         >>> intvec([[1,3],[2,5]]).split()
         (intvec([interval([1.0, 3.0]),interval([2.0, 3.5])]),
         intvec([interval([1.0, 3.0]),interval([3.5, 5.0])]))
+        
     """
 
     def __new__(self,args):

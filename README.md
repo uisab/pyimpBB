@@ -1,4 +1,4 @@
-# pyimpBB - A branch-and-bound method in Python using the improvement function
+# pyimpBB - A branch-and-bound method using the improvement function in Python
 
 This package provides the implementation of a novel branch-and-bound algorithm for the outer approximation 
 of all global minimal points of a nonlinear constrained optimization problem using the improvement function, 
@@ -24,6 +24,9 @@ or github:
     git clone https://github.com/uisab/Python_Code.git
     python3 -m pip setup.py sdist bdist_wheel
     python3 -m pip install dist/*.whl
+
+In case of problems with the required packages pyinterval (or crlibm) during installation, try <kbd>python3 -m pip install 'setuptools<=74.1.3'</kbd> 
+or look out [here](https://github.com/taschini/pyinterval/issues). 
 
 ## Structure/ API:
 The package consists of the four modules <kbd>pyimpBB.helper</kbd>, <kbd>pyimpBB.bounding</kbd>, 
@@ -120,13 +123,17 @@ use <kbd>help(<module/class/function name>)</kbd>.
 ## Application:
 The use of this package will be shown and explained using a simple example. To do this, consider the optimization 
 problem of the form
+
 $$\min_x f(x) \quad s.t. \quad \omega(x) = \max\lbrace \omega_1(x), \ldots, \omega_4(x) \rbrace \leq 0,\quad\negthickspace x \in X$$
+
 with nonempty box $X := ([0,3],[0,3])^\intercal \subseteq \mathbb{I}\negthinspace\mathbb{R}^2$ and continuously 
 differentiable functions $f,\omega_i: \mathbb{R}^2 \rightarrow \mathbb{R}, i \in \lbrace 1, \ldots, 4\rbrace$ 
 defined as
+
 $$f(x) := x_1 + x_2,$$ 
 $$\omega_1(x) := -(x_1^2 + x_2^2) +4, \quad \omega_3(x) := x_1 -x_2 -2,$$
 $$\omega_2(x) := -x_1 +x_2 -2, \qquad\negthickspace \omega_4(x) := x_1^2 +x_2^2 -9.$$
+
 This example problem should now be solved using the algorithm provided by this package and then analyzed using 
 the representation functions also provided. To do this, it can first be modeled as follows using the class 
 <kbd>intvec</kbd> from the module <kbd>pyimpBB.helper</kbd>.
@@ -257,7 +264,7 @@ a selection of the iterations to be displayed as a list.
     
     iterations_in_decision_space_plot(func,X,data,iterations,cons=cons,columns=2,levels=[2,2.5],figsize=(8,6),facecolor="white")
 
-![](doc_bsp_plot.png)
+![Representation of the approximation progress of the algorithm in the decision space of the test example for given iterations](https://github.com/uisab/pyimpBB/blob/master/doc_bsp_plot.png)
 
 In this plot, the box $X$ (colored light blue), the feasible set $\Omega  := \lbrace x \in X \mid \omega(x) \leq 0 \rbrace$ 
 (colored purple), the course of the objective function $f$ based on the level lines to the global minimum value $v$ 

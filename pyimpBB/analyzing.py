@@ -4,7 +4,7 @@ import matplotlib.patches as mpatch
 import mpl_toolkits.mplot3d.art3d as art3d
 from matplotlib.colors import LinearSegmentedColormap
 import numpy as np
-from pyinterval import fpu
+from interval import fpu
 from pyimpBB.bounding import centerd_forms
 from pyimpBB.helper import obvec,intvec
 from typing import Callable, Union, List, Tuple
