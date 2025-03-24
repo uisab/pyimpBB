@@ -3,7 +3,7 @@
 This package provides the implementation of a novel branch-and-bound algorithm for the outer approximation 
 of all global minimal points of a nonlinear constrained optimization problem using the improvement function, 
 internally referred to as 'improved_BandB', to the corresponding publication 'The improvement function in 
-branch-and-bound methods' by P. Kirst, S. Schwarze and O. Stein. 
+branch-and-bound methods' by P. Kirst, M. Rodestock, S. Schwarze and O. Stein. 
 
 ## Installation:
 The easiest and yet preferred way to install this package is to use <kbd>pip</kbd>. 

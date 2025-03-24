@@ -62,29 +62,19 @@ def improved_BandB(func: Callable[[obvec],float], cons: List[Callable[[obvec],fl
                         O.append((Xi,gamma_X,delta_X))
                     
                     if id(L_argmin_e) == id(L_argmin_emax):
-                        Y1,Y2 = L_argmin_e[0].split()
+                        L = [Li for Li in L if id(Li) != id(L_argmin_e)]
+                        L_to_split = [L_argmin_e]
+                    else:
+                        L = [Li for Li in L if (id(Li) != id(L_argmin_e) and id(Li) != id(L_argmin_emax))]
+                        L_to_split = [L_argmin_e,L_argmin_emax]
+                    for L_i in L_to_split:
+                        Y1,Y2 = L_i[0].split()
                         lb_omega_Y1 = bounding_omega(Y1,"lower")
                         lb_omega_Y2 = bounding_omega(Y2,"lower")
                         lb_f_Y1 = bounding_procedure(func,grad,hess,Y1,direction="lower")[0]
                         lb_f_Y2 = bounding_procedure(func,grad,hess,Y2,direction="lower")[0]
-                        
-                        L = [Li for Li in L if id(Li) != id(L_argmin_e)]
+
                         L.extend([(Y1,lb_omega_Y1,lb_f_Y1),(Y2,lb_omega_Y2,lb_f_Y2)])
-                    else:
-                        Y1_e,Y2_e = L_argmin_e[0].split()
-                        lb_omega_Y1_e = bounding_omega(Y1_e,"lower")
-                        lb_omega_Y2_e = bounding_omega(Y2_e,"lower")
-                        lb_f_Y1_e = bounding_procedure(func,grad,hess,Y1_e,direction="lower")[0]
-                        lb_f_Y2_e = bounding_procedure(func,grad,hess,Y2_e,direction="lower")[0]
-
-                        Y1_emax,Y2_emax = L_argmin_emax[0].split()
-                        lb_omega_Y1_emax = bounding_omega(Y1_emax,"lower")
-                        lb_omega_Y2_emax = bounding_omega(Y2_emax,"lower")
-                        lb_f_Y1_emax = bounding_procedure(func,grad,hess,Y1_emax,direction="lower")[0]
-                        lb_f_Y2_emax = bounding_procedure(func,grad,hess,Y2_emax,direction="lower")[0]
-
-                        L = [Li for Li in L if (id(Li) != id(L_argmin_e) and id(Li) != id(L_argmin_emax))]
-                        L.extend([(Y1_e,lb_omega_Y1_e,lb_f_Y1_e),(Y2_e,lb_omega_Y2_e,lb_f_Y2_e),(Y1_emax,lb_omega_Y1_emax,lb_f_Y1_emax),(Y2_emax,lb_omega_Y2_emax,lb_f_Y2_emax)])
 
         #info zusatz
         k += 1
@@ -112,12 +102,12 @@ def improved_boxres_BandB(func: Callable[[obvec],float], X: intvec, bounding_pro
     
     #info zusatz
     k = 0
-    save = {0:([(X,-np.inf,np.inf)],[(X,lb_f_Y)])}
+    save = {0:([(X,-np.inf)],[(X,lb_f_Y)])}
     #end
     
     O,L = [],[(X,lb_f_Y)]
 
-    O_to_split = [(X,-np.inf,np.inf)]
+    O_to_split = [(X,-np.inf)]
     while O_to_split and k < k_max:
         
         Oi = O_to_split[0] #Breitensuche alternativ auch mit O_next dann aber save je iteration nicht möglich
@@ -143,23 +133,17 @@ def improved_boxres_BandB(func: Callable[[obvec],float], X: intvec, bounding_pro
                     O.append((Xi,gamma_X))
                 
                 if id(L_argmin_e) == id(L_argmin_emax):
-                    Y1,Y2 = L_argmin_e[0].split()
+                    L = [Li for Li in L if id(Li) != id(L_argmin_e)]
+                    L_to_split = [L_argmin_e]
+                else:
+                    L = [Li for Li in L if (id(Li) != id(L_argmin_e) and id(Li) != id(L_argmin_emax))]
+                    L_to_split = [L_argmin_e,L_argmin_emax]
+                for L_i in L_to_split:
+                    Y1,Y2 = L_i[0].split()
                     lb_f_Y1 = bounding_procedure(func,grad,hess,Y1,direction="lower")[0]
                     lb_f_Y2 = bounding_procedure(func,grad,hess,Y2,direction="lower")[0]
-                    
-                    L = [Li for Li in L if id(Li) != id(L_argmin_e)]
+
                     L.extend([(Y1,lb_f_Y1),(Y2,lb_f_Y2)])
-                else:
-                    Y1_e,Y2_e = L_argmin_e[0].split()
-                    lb_f_Y1_e = bounding_procedure(func,grad,hess,Y1_e,direction="lower")[0]
-                    lb_f_Y2_e = bounding_procedure(func,grad,hess,Y2_e,direction="lower")[0]
-
-                    Y1_emax,Y2_emax = L_argmin_emax[0].split()
-                    lb_f_Y1_emax = bounding_procedure(func,grad,hess,Y1_emax,direction="lower")[0]
-                    lb_f_Y2_emax = bounding_procedure(func,grad,hess,Y2_emax,direction="lower")[0]
-
-                    L = [Li for Li in L if (id(Li) != id(L_argmin_e) and id(Li) != id(L_argmin_emax))]
-                    L.extend([(Y1_e,lb_f_Y1_e),(Y2_e,lb_f_Y2_e),(Y1_emax,lb_f_Y1_emax),(Y2_emax,lb_f_Y2_emax)])
 
         #info zusatz
         k += 1

@@ -1,8 +1,8 @@
 '''This Modul contains convergent bounding procedures as python functions for use in all other models of this package and beyond.'''
-#from interval import interval
+from interval import interval
 import numpy as np
 from scipy.optimize import minimize, Bounds
-from pyimpBB.helper import obvec, intvec, obmat, interval
+from pyimpBB.helper import obvec, intvec, obmat
 from typing import Callable, Union
 
 def optimal_centerd_forms(func: Callable[[obvec], float], grad: Callable[[obvec],obvec], hess, X: intvec, direction: str="lower") -> obvec:

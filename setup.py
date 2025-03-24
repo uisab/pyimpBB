@@ -7,8 +7,8 @@ with open(path.join(working_directory, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='pyimpBB',
-    version='0.0.6',
-    description='Implementation of an algorithm from the field of global optimization according to the publication ‘The improvement function in branch-and-bound methods’ by P. Kirst, S. Schwarze and O. Stein.',
+    version='0.0.8',
+    description='Implementation of an algorithm from the field of global optimization according to the publication ‘The improvement function in branch-and-bound methods’ by P. Kirst, M. Rodestock, S. Schwarze and O. Stein.',
     long_description=long_description,
     long_description_content_type='text/markdown',
     author='Marc Rodestock',

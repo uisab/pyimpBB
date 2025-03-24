@@ -362,12 +362,6 @@ class obmat(tuple):
     
     T = property(transpose)
 
-class interval(interval):
-    @property
-    def width(self):
-        """The interval consisting only of the width of each component."""
-        return self.new(self.Component(x,x) for x in (c.sup - c.inf for c in self))
-
 class intvec(obvec):
     """A vector consisting of intervals from the pyinterval package.
     
