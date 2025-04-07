@@ -20,7 +20,8 @@ def improved_BandB(func: Callable[[obvec],float], cons: List[Callable[[obvec],fl
         #return max((bounding_procedure(lambda x: cons(x)[i],lambda x: cons_jac(x).T[i],lambda x: cons_hessvec(x)[i],X,direction=direct)[0] for i in range(len(cons(X))))) #vektorwertige Funktion cons
         return max((bounding_procedure(cons_i, cons_grad_i, cons_hess_i, X, direction=direct)[0] for cons_i,cons_grad_i,cons_hess_i in zip_longest(cons,cons_grad,cons_hess))) #liste reeller Funktionen cons_1, ..., cons_n
         #return np.max(bounding_procedure(cons, cons_div, cons_hessvec, X, direction=direct)) #in Combi mit vektorwertigen boundings
-    
+
+
     lb_omega_Y = bounding_omega(X,"lower")
     lb_f_Y = bounding_procedure(func,grad,hess,X,direction="lower")[0]
     
@@ -30,7 +31,8 @@ def improved_BandB(func: Callable[[obvec],float], cons: List[Callable[[obvec],fl
     #end
     
     O,L = [],[(X,lb_omega_Y,lb_f_Y)]
-
+    y_best = None
+    f_y_best = np.inf
     O_to_split = [(X,-np.inf,np.inf)]
     while O_to_split and k < k_max:
         
@@ -44,37 +46,45 @@ def improved_BandB(func: Callable[[obvec],float], cons: List[Callable[[obvec],fl
 
             if not l_omega_X > delta:
                 ub_f = bounding_procedure(func,grad,hess,Xi,direction="upper")[0]
-                L_argmin_e = min(L, key= lambda Li: max(Li[1],Li[2] -ub_f +epsilon)) 
+                lb_f = bounding_procedure(func,grad,hess,Xi,direction="lower")[0]
+                discarded_as_suboptimal = False
+                if y_best:
+                    if (f_y_best-lb_f+epsilon)<0:
+                        discarded_as_suboptimal = True
                 
-                y_mid = L_argmin_e[0].midpoint()
-                
-                #ub_psi_e = max(np.max(cons(y_mid)),func(y_mid)-bounding_procedure(func,grad,hess,Xi,direction="lower")[0] +epsilon)
-                ub_psi_e = max(max(cons_i(y_mid) for cons_i in cons),func(y_mid)-bounding_procedure(func,grad,hess,Xi,direction="lower")[0] +epsilon)
-                
-                if not ub_psi_e < 0:
-                    L_argmin_emax = min(L, key= lambda Li: max(Li[1],Li[2] -ub_f +epsilon_max))
-                    
-                    gamma_X = max(L_argmin_emax[1],L_argmin_emax[2] -ub_f +epsilon_max)
-                    delta_X = bounding_omega(Xi,"upper")
-                    if gamma_X < 0 or delta_X > delta_max:
-                        O_to_split.append((Xi,gamma_X,delta_X))
-                    else:
-                        O.append((Xi,gamma_X,delta_X))
-                    
-                    if id(L_argmin_e) == id(L_argmin_emax):
-                        L = [Li for Li in L if id(Li) != id(L_argmin_e)]
-                        L_to_split = [L_argmin_e]
-                    else:
-                        L = [Li for Li in L if (id(Li) != id(L_argmin_e) and id(Li) != id(L_argmin_emax))]
-                        L_to_split = [L_argmin_e,L_argmin_emax]
-                    for L_i in L_to_split:
-                        Y1,Y2 = L_i[0].split()
-                        lb_omega_Y1 = bounding_omega(Y1,"lower")
-                        lb_omega_Y2 = bounding_omega(Y2,"lower")
-                        lb_f_Y1 = bounding_procedure(func,grad,hess,Y1,direction="lower")[0]
-                        lb_f_Y2 = bounding_procedure(func,grad,hess,Y2,direction="lower")[0]
+                if not discarded_as_suboptimal:
+                    L_argmin_e = min(L, key=lambda Li: max(Li[1], Li[2] - ub_f + epsilon))
+                    y_mid = L_argmin_e[0].midpoint()
+                    if max(cons_i(y_mid) for cons_i in cons)<0 and func(y_mid)<f_y_best:
+                        y_best = y_mid
+                        f_y_best = func(y_mid)
+                        if (f_y_best-lb_f+epsilon)<0:
+                            discarded_as_suboptimal = True
 
-                        L.extend([(Y1,lb_omega_Y1,lb_f_Y1),(Y2,lb_omega_Y2,lb_f_Y2)])
+                    if not discarded_as_suboptimal:
+                        L_argmin_emax = min(L, key= lambda Li: max(Li[1],Li[2] -ub_f +epsilon_max))
+
+                        gamma_X = max(L_argmin_emax[1],L_argmin_emax[2] -ub_f +epsilon_max)
+                        delta_X = bounding_omega(Xi,"upper")
+                        if gamma_X < 0 or delta_X > delta_max:
+                            O_to_split.append((Xi,gamma_X,delta_X))
+                        else:
+                            O.append((Xi,gamma_X,delta_X))
+
+                        if id(L_argmin_e) == id(L_argmin_emax):
+                            L = [Li for Li in L if id(Li) != id(L_argmin_e)]
+                            L_to_split = [L_argmin_e]
+                        else:
+                            L = [Li for Li in L if (id(Li) != id(L_argmin_e) and id(Li) != id(L_argmin_emax))]
+                            L_to_split = [L_argmin_e,L_argmin_emax]
+                        for L_i in L_to_split:
+                            Y1,Y2 = L_i[0].split()
+                            lb_omega_Y1 = bounding_omega(Y1,"lower")
+                            lb_omega_Y2 = bounding_omega(Y2,"lower")
+                            lb_f_Y1 = bounding_procedure(func,grad,hess,Y1,direction="lower")[0]
+                            lb_f_Y2 = bounding_procedure(func,grad,hess,Y2,direction="lower")[0]
+
+                            L.extend([(Y1,lb_omega_Y1,lb_f_Y1),(Y2,lb_omega_Y2,lb_f_Y2)])
 
         #info zusatz
         k += 1
