@@ -280,7 +280,7 @@ a selection of the iterations to be displayed as a list.
     
     iterations_in_decision_space_plot(func,X,data,iterations,cons=cons,columns=2,levels=[3,3.5],figsize=(8,6),facecolor="white")
 
-![Representation of the approximation progress of the algorithm in the decision space of the test example for given iterations](https://github.com/uisab/pyimpBB/blob/master/doc_bsp_plot.png)
+![Representation of the approximation progress of the algorithm in the decision space of the test example for given iterations](https://raw.githubusercontent.com/uisab/pyimpBB/master/doc_bsp_plot.png)
 
 In this plot, the box $X$ (colored light blue), the feasible set $\Omega  := \lbrace x \in X \mid \omega(x) \leq 0 \rbrace$ 
 (colored purple), the course of the objective function $f$ based on the level lines to the global minimum value $v$ 
