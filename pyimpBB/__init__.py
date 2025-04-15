@@ -1,3 +1,7 @@
+# Copyright (c) 2024, Marc Rodestock <marc@fam-rodestock.de>
+# All rights reserved.
+# See LICENSE for details.
+
 """A branch-and-bound method using the improvement function in Python
 
 This package provides the implementation of a novel branch-and-bound algorithm for the outer approximation 

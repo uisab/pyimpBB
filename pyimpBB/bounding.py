@@ -30,10 +30,10 @@ def optimal_centerd_forms(func: Callable[[obvec], float], grad: Callable[[obvec]
         #return np.array([f[0].inf for f in F(X,c)])
     elif(direction == "upper"):
         for i in range(len(X)):
-            if(L[i][0].sup <= 0):
+            if(L[i][-1].sup <= 0):
                 c[i] = X[i][0].inf
             elif(L[i][0].inf >= 0):
-                c[i] = X[i][0].sup
+                c[i] = X[i][-1].sup
             else:
                 c[i] = (L[i][0].inf*X[i][0].inf - L[i][-1].sup*X[i][-1].sup)/(L[i][0].inf - L[i][-1].sup)
         bounds = F(X,obvec(c))
@@ -87,8 +87,8 @@ def aBB_relaxation(func: Callable[[obvec],float], grad: Callable[[obvec],obvec],
     h_alpha = lambda x: h(x) + (alpha/2)*(X.inf -obvec(x))@(X.sup -obvec(x))
     hg_alpha = lambda x: hg(x) + (alpha/2)*(-X.sup -X.inf +2*obvec(x))
     bounds = Bounds(list(X.inf),list(X.sup))
-    res = minimize(h_alpha, X.midpoint(), method='SLSQP', jac=hg_alpha, bounds=bounds)
-    lb = lam*res.fun if res.success else lam*-np.inf #func(res.x) + (alpha/2)*(X.inf -obvec(res.x))@(X.sup -obvec(res.x))
+    res = minimize(h_alpha, X.midpoint(), method='SLSQP', jac=hg_alpha, options={'ftol':1e-9}, bounds=bounds)
+    lb = lam*(res.fun -1e-9) if res.success else lam*-np.inf #func(res.x) + (alpha/2)*(X.inf -obvec(res.x))@(X.sup -obvec(res.x))
     return obvec([lb])
 
 def direct_intervalarithmetic(func: Callable[[obvec],float], grad, hess, X: intvec, direction: str="lower") -> obvec:

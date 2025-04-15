@@ -7,8 +7,8 @@ with open(path.join(working_directory, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='pyimpBB',
-    version='0.0.8',
-    description='Implementation of an algorithm from the field of global optimization according to the publication ‘The improvement function in branch-and-bound methods’ by P. Kirst, M. Rodestock, S. Schwarze and O. Stein.',
+    version='0.1.0',
+    description='Implementation of an algorithm from the field of global optimization according to the publication ‘The improvement function in branch-and-bound methods for complete global optimization’ by P. Kirst, M. Rodestock, S. Schwarze and O. Stein.',
     long_description=long_description,
     long_description_content_type='text/markdown',
     author='Marc Rodestock',
@@ -26,7 +26,7 @@ setup(
     #python_requires='==3.9',
     install_requires=['numpy','matplotlib','pyinterval','scipy'],
     project_urls={
-    #    "The Publication": "",
+    #    "Publication": "",
         "Institution": "https://www.ior.kit.edu",
         "Source": "https://github.com/uisab/pyimpBB"
     }

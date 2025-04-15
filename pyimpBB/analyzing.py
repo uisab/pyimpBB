@@ -10,13 +10,16 @@ from pyimpBB.helper import obvec,intvec
 from typing import Callable, Union, List, Tuple
 
 def iterations_in_decision_space_plot(func: Callable[[obvec],float],X: intvec,data: dict,iterations: list,cons: Union[List[Callable[[obvec],float]],None]=None,title: str="Iterations in decision space",
-                                      fname: Union[str,None]=None,columns: int=3,levels: Union[int,List[float],None]=None,mgres:int = 100,xylim: Union[List[Tuple[float,float]],None]=None, **args) -> None:
-    """Generates a tabular representation in which the decision space is shown for given iterations, 
-    including level lines of the objective function, zero level lines of the constraints, enclosing box X and associated approximation or decomposition progress.
+                                      subtitle: str='View of the decision space in Iteration {}',fname: Union[str,None]=None,columns: int=3,levels: Union[int,List[float],None]=None,
+                                      cons_deltas: Union[List[float],None]=None,mgres:int = 100,xylim: Union[List[Tuple[float,float]],None]=None,legend_labels: List[str]=None, **args) -> None:
+    """Generates a tabular representation in which the decision space is shown for given iterations, including level lines of the objective function, 
+    zero level lines of the constraints, bounded feasible set, enclosing box X and associated approximation or decomposition progress.
     The arguments have to be a python function 'func', which correspond to the real objective function, a intvec 'X' bounding and/or surrounding the feasible set, 
-    a dictionary 'data' containing the corresponding box progress for a given iteration, a list of iterations to display, a optional list of python functions 'cons', which correspond to the constraints, 
-    an optional title of the plot, an optional file name to save the plot, an optional number of columns, an optional numper or list of specified levels for the contour plot of 'func', 
-    an optional value 'mgres' for the meshgrid resolution, an optional list of 'xy' dimension limits 'xylim' and additional optional parameters to 'plt.figure'."""
+    a dictionary 'data' containing the corresponding box progress for a given iteration, a list of iterations to display, a optional list of python functions 'cons', 
+    which correspond to the constraints, an optional string as title of the plot, an optional formatstring with a placeholder for the iteration as subtitle of the subplots, 
+    an optional file name to save the plot, an optional number of columns, an optional number or list of specified levels for the contour plot of 'func', 
+    an optional list of constraint tolerances as levels for the contour plot of 'cons', an optional value 'mgres' for the meshgrid resolution, 
+    an optional list of 'xy' dimension limits 'xylim', an optional list of four labels to 'fig.legend' and additional optional parameters to 'plt.figure'."""
 
     rows = -(-len(iterations)//columns)
 
@@ -29,6 +32,8 @@ def iterations_in_decision_space_plot(func: Callable[[obvec],float],X: intvec,da
         fis_test = np.ones(shape=X_1.shape).astype(bool)
         for cons_bool in (cons_eval <= 0):
             fis_test = fis_test & cons_bool
+        box_bool = ((X_1 >= X[0][0].inf) & (X_1 <= X[0][-1].sup)) & ((X_2 >= X[1][0].inf) & (X_2 <= X[1][-1].sup))
+        fis_test = fis_test & box_bool
 
     fig = plt.figure(**args,layout="constrained")
     fig.suptitle(title,fontsize="x-large",verticalalignment='center')
@@ -42,6 +47,7 @@ def iterations_in_decision_space_plot(func: Callable[[obvec],float],X: intvec,da
         if cons:
             for Z in cons_eval:
                 ax.contour(X_1,X_2,Z,levels=[0],colors="purple")
+                if cons_deltas: ax.contour(X_1,X_2,Z,levels=cons_deltas,colors="purple", linestyles='dashed')
 
             ax.imshow(fis_test.astype(int), extent=(xylim[0][0],xylim[0][1],xylim[1][0],xylim[1][1]),origin='lower',cmap='Purples',alpha=0.5,aspect='auto')
 
@@ -64,13 +70,16 @@ def iterations_in_decision_space_plot(func: Callable[[obvec],float],X: intvec,da
         ax.grid(color="lightgray")
         ax.set_xlabel("$x_1$")
         ax.set_ylabel("$x_2$")
-        ax.set_title("View of the decision space in Iteration "+str(k))
+        ax.set_title(subtitle.format(k))
 
     f_patch = mpatch.Patch(color="darkred", label="Objectiv function level lines")
     c_patch = mpatch.Patch(color="purple", label="Constraints zero level lines")
     X_patch = mpatch.Patch(color="lightblue", label="Enclosing box $X$")
     B_patch = mpatch.Patch(color="darkorange", label="Box-data")
-    fig.legend(handles=[f_patch,c_patch,X_patch,B_patch], loc="lower center", ncol=4, mode="expand")
+    if legend_labels:
+        fig.legend(handles=[f_patch,c_patch,X_patch,B_patch], labels=legend_labels, loc="lower center", ncol=4, mode="expand")
+    else:
+        fig.legend(handles=[f_patch,c_patch,X_patch,B_patch], loc="lower center", ncol=4, mode="expand")
     
     if fname:
         plt.savefig(fname,bbox_inches='tight')
@@ -84,13 +93,16 @@ map_object = LinearSegmentedColormap.from_list(name='purple_alpha',colors=color_
 plt.colormaps.register(cmap=map_object)
 
 def iterations_in_objective_space_plot(func: Callable[[obvec],float],X: intvec,data: dict,iterations: list,grad: Union[Callable[[obvec],obvec],None]=None,cons: Union[List[Callable[[obvec],float]],None]=None,
-                                       title: str='Iterations in objective space',fname: Union[str,None]=None,columns: int=3,dspace: bool=True,mgres:int = 100,xyzlim: Union[List[Tuple[float,float]],None]=None, **args) -> None:
+                                       title: str='Iterations in objective space',subtitle: str='View of the object space in Iteration {}',fname: Union[str,None]=None,columns: int=3,dspace: bool=True,
+                                       mgres:int = 100,xyzlim: Union[List[Tuple[float,float]],None]=None,legend_labels: List[str]=None, **args) -> None:
     """Generates a tabular representation in which the objective space is shown for given iterations, 
     including the surface of the objective function, the associated optimal value approximation progress and optionally the decision space.
-    The arguments have to be up to two python functions 'func' and 'grad',which correspond to the real objective function with associated gradient, a intvec 'X' bounding and/or surrounding the feasible set, 
-    a dictionary 'data' containing the corresponding box progress for a given iteration, a list of iterations to display, a optional list of python functions 'cons', which correspond to the constraints, 
-    an optional title of the plot, an optional file name to save the plot, an optional number of columns, an optional flag for plotting the decision space 'dspace', 
-    an optional value 'mgres' for the meshgrid resolution, an optional list of 'xyz' dimension limits 'xyzlim' and additional optional parameters to 'plt.figure'."""
+    The arguments have to be up to two python functions 'func' and 'grad',which correspond to the real objective function with associated gradient, 
+    a intvec 'X' bounding and/or surrounding the feasible set, a dictionary 'data' containing the corresponding box progress for a given iteration, 
+    a list of iterations to display, a optional list of python functions 'cons', which correspond to the constraints, an optional string as title of the plot, 
+    an optional formatstring with a placeholder for the iteration as subtitle of the subplots, an optional file name to save the plot, an optional number of columns, 
+    an optional flag for plotting the decision space 'dspace', an optional value 'mgres' for the meshgrid resolution, 
+    an optional list of 'xyz' dimension limits 'xyzlim', an optional list of four labels to 'fig.legend' and additional optional parameters to 'plt.figure'."""
     
     rows = -(-len(iterations)//columns)
     if not xyzlim:
@@ -113,6 +125,8 @@ def iterations_in_objective_space_plot(func: Callable[[obvec],float],X: intvec,d
         fis_test = np.ones(shape=X_1.shape).astype(bool)
         for cons_bool in (cons_eval <= 0):
             fis_test = fis_test & cons_bool
+        box_bool = ((X_1 >= X[0][0].inf) & (X_1 <= X[0][-1].sup)) & ((X_2 >= X[1][0].inf) & (X_2 <= X[1][-1].sup))
+        fis_test = fis_test & box_bool
 
     fig = plt.figure(**args,layout="constrained")
     fig.suptitle(title,fontsize="x-large")
@@ -157,13 +171,16 @@ def iterations_in_objective_space_plot(func: Callable[[obvec],float],X: intvec,d
         ax.set_xlabel("$x_1$")
         ax.set_ylabel("$x_2$")
         ax.set_zlabel("$z$")
-        ax.set_title("View of the object space in Iteration "+str(k))
+        ax.set_title(subtitle.format(k))
     
     f_patch = mpatch.Patch(color="darkred", label="Objectiv function")
     c_patch = mpatch.Patch(color="purple", label="Constraints zero level lines")
     X_patch = mpatch.Patch(color="lightblue", label="Enclosing box $X$")
     B_patch = mpatch.Patch(color="darkorange", label="Box-data")
-    fig.legend(handles=[f_patch,c_patch,X_patch,B_patch], loc="lower center", ncol=4, mode="expand")
+    if legend_labels:
+        fig.legend(handles=[f_patch,c_patch,X_patch,B_patch], labels=legend_labels, loc="lower center", ncol=4, mode="expand")
+    else:
+        fig.legend(handles=[f_patch,c_patch,X_patch,B_patch], loc="lower center", ncol=4, mode="expand")
     
     if fname:
         plt.savefig(fname,bbox_inches='tight')
