@@ -143,8 +143,9 @@ class obvec(tuple):
     def __eq__(self,other):
         return self==other
     
+    @vecoperator
     def __ne__(self,other):
-        return not (self==other)
+        return self!=other
     
     @vecoperator
     def __lt__(self,other):
@@ -330,8 +331,9 @@ class obmat(tuple):
     def __eq__(self,other):
         return self==other
     
+    @matoperator
     def __ne__(self,other):
-        return not (self==other)
+        return self!=other
     
     @matoperator
     def __lt__(self,other):
@@ -376,12 +378,39 @@ class intvec(obvec):
     def __new__(self,args):
         return obvec.__new__(self,(interval(a) for a in args))
     
+    def __eq__(self,other):
+        return tuple.__eq__(self,other)
+    
+    def __ne__(self,other):
+        return tuple.__ne__(self,other)
+    
+    def __lt__(self,other):
+        return tuple.__lt__(self,other)
+    
+    def __le__(self,other):
+        return tuple.__le__(self,other)
+    
+    def __ge__(self,other):
+        return tuple.__ge__(self,other)
+    
+    def __gt__(self,other):
+        return tuple.__gt__(self,other)
+    
+    def __contains__(self, key):
+        if isinstance(key,obvec):
+            if len(self) == len(key):
+                return all((k in s for s,k in zip(self,key)))
+            else:
+                raise ValueError("operands could not be broadcast together with shapes " +str(len(self))+" != "+str(len(key)))
+        else:
+            return NotImplemented
+
     def width(self):
         '''Returns the width of an interval-vector according to max_{1≤i≤n} w(X_i) as float.'''
         return max(s.width[0][0] for s in self)
 
     def midpoint(self):
-        '''Returns the midpoint of an interval-vector according to (x.sup - x.inf)/2 as numpy array.'''
+        '''Returns the midpoint of an interval-vector according to (x.sup - x.inf)/2 as obvec.'''
         return obvec((s.midpoint[0][0] for s in self))
     
     def split(self):

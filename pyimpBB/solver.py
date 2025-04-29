@@ -219,7 +219,7 @@ def fathomed_improved_BandB(func: Callable[[obvec],float], cons: List[Callable[[
                             for Yi in Y1_Y2:
                                 lb_omega_Yi = bounding_omega(Yi,"lower")
                                 lb_f_Yi = bounding_procedure(func,grad,hess,Yi,direction="lower")[0]
-                                lb_psi_e = max(lb_omega_Yi,lb_f_Yi -v_best +epsilon)
+                                lb_psi_e = max(lb_omega_Yi,lb_f_Yi -v_best -epsilon)
                                 if not lb_psi_e > 0:
                                     L.append((Yi,lb_omega_Yi,lb_f_Yi))
 
