@@ -19,7 +19,9 @@ def improved_BandB(func: Callable[[obvec],float], cons: List[Callable[[obvec],fl
     
     def bounding_omega(X,direct):
         return max((bounding_procedure(cons_i, cons_grad_i, cons_hess_i, X, direction=direct)[0] for cons_i,cons_grad_i,cons_hess_i in zip_longest(cons,cons_grad,cons_hess)))
-    
+
+    start = time.monotonic()
+
     lb_omega_Y = bounding_omega(X,"lower")
     lb_f_Y = bounding_procedure(func,grad,hess,X,direction="lower")[0]
     
@@ -81,8 +83,8 @@ def improved_BandB(func: Callable[[obvec],float], cons: List[Callable[[obvec],fl
         k += 1
     
     O.extend(O_to_split)
-
-    return O ,y_best ,k
+    t = time.monotonic() - start
+    return O ,y_best ,k, t
 
 def improved_boxres_BandB(func: Callable[[obvec],float], X: intvec, bounding_procedure: Callable[[Callable[[obvec], float], Callable[[obvec],obvec], intvec, str],obvec], 
                           grad: Callable[[obvec],obvec]=None, hess: Callable[[obvec],obmat]=None, epsilon: float = 0, epsilon_max: float = 0.5, max_iter: int = 2500) -> Tuple[list,obvec,int]:
