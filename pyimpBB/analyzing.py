@@ -5,7 +5,7 @@ import mpl_toolkits.mplot3d.art3d as art3d
 from matplotlib.colors import LinearSegmentedColormap
 import numpy as np
 from interval import fpu
-from pyimpBB.bounding import centerd_forms
+from pyimpBB.bounding import centered_forms
 from pyimpBB.helper import obvec,intvec
 from typing import Callable, Union, List, Tuple
 
@@ -107,7 +107,7 @@ def iterations_in_objective_space_plot(func: Callable[[obvec],float],X: intvec,d
     rows = -(-len(iterations)//columns)
     if not xyzlim:
         if grad:
-            lb_f, ub_f = centerd_forms(func,grad,None,X,direction="lower")[0], centerd_forms(func,grad,None,X,direction="upper")[0]
+            lb_f, ub_f = centered_forms(func,grad,None,X,direction="lower")[0], centered_forms(func,grad,None,X,direction="upper")[0]
         else:
             lb_f, ub_f = -fpu.infinity, fpu.infinity
         if lb_f == -fpu.infinity or ub_f == fpu.infinity:
