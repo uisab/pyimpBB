@@ -226,10 +226,10 @@ TP_list.append(["TP6_2",(func,grad,hess,cons,cons_grad,cons_hess),X,(obvec([1.5,
 #-----------------------------------------------
 epsilon_max_list = [0.5]*8
 delta_max_list = [0.5]*8
-bounding_procedure_list = [optimal_centerd_forms]*8
+bounding_procedure_list = [optimal_centered_forms]*8
 max_time_list = [240]*8
 
-fname = os.path.join(os.path.dirname(__file__), "../TP_probe")
+fname = None #os.path.join(os.path.dirname(__file__), "../TP_probe")
 
 
 #Code - Running the algorithm and collecting data
@@ -246,7 +246,7 @@ for j,TP in enumerate(TP_list):
     #Code je TP
     #-----------------------------------------------
     #start = time.monotonic()
-    solution, y_best ,k ,t ,L = analysed_improved_BandB(func, cons, X, bounding_procedure=bounding_procedure, grad=grad, hess=hess, cons_grad=cons_grad, cons_hess=cons_hess, epsilon=0, delta=0, epsilon_max=epsilon_max, delta_max=delta_max, max_time=max_time, save_lists=False)
+    solution, y_best ,k ,t ,W = analysed_impfunc_BandB(func, cons, X, bounding_procedure=bounding_procedure, grad=grad, hess=hess, cons_grad=cons_grad, cons_hess=cons_hess, epsilon=0, delta=0, epsilon_max=epsilon_max, delta_max=delta_max, max_time=max_time, save_lists=False)
     #total_time = time.monotonic() - start
 
     solution_Boxes = [Oi[0] for Oi in solution]
@@ -264,7 +264,7 @@ for j,TP in enumerate(TP_list):
         edge_data["Best incumbent value"] = "-"
     edge_data["Iterations needed/done"] = k
     edge_data["Runtime [s]"] = t #total_time
-    edge_data["Number of subdivisions in L"] = len(L)
+    edge_data["Number of left boxes in W"] = len(W)
     
     try: 
         import pandas as pd
@@ -273,8 +273,8 @@ for j,TP in enumerate(TP_list):
     except:
         if probe_count == 0: 
             print("Restricted test problems - Data:")
-            print(f"{' ':8s}",f"{'Tolerance epsilon_max':>24s}",f"{'Tolerance delta_max':>24s}",f"{'Bounding procedure':>24s}",f"{'Search':>12s}",f"{'Number of solution boxes':>24s}",f"{'Approximation includes S':>24s}",f"{'Best incumbent':>24s}",f"{'Best incumbent value':>24s}",f"{'Iterations needed/done':>24s}",f"{'Runtime [s]':>12s}",f"{'Number of subdivisions in L':>28s}")
-        print(f"{TP_title:8s}",f"{edge_data['Tolerance epsilon_max']:>24.6f}",f"{edge_data['Tolerance delta_max']:>24.6f}",f"{edge_data['Bounding procedure']:>24s}",f"{edge_data['Search']:>12s}",f"{edge_data['Number of solution boxes']:>24d}",f"{edge_data['Approximation includes S']:>24b}",f"{edge_data['Best incumbent']:>24s}",f"{edge_data['Best incumbent value']:>24.6f}",f"{edge_data['Iterations needed/done']:>24d}",f"{edge_data['Runtime [s]']:>12.6f}",f"{edge_data['Number of subdivisions in L']:>28d}")
+            print(f"{' ':8s}",f"{'Tolerance epsilon_max':>24s}",f"{'Tolerance delta_max':>24s}",f"{'Bounding procedure':>24s}",f"{'Search':>12s}",f"{'Number of solution boxes':>24s}",f"{'Approximation includes S':>24s}",f"{'Best incumbent':>24s}",f"{'Best incumbent value':>24s}",f"{'Iterations needed/done':>24s}",f"{'Runtime [s]':>12s}",f"{'Number of left boxes in W':>28s}")
+        print(f"{TP_title:8s}",f"{edge_data['Tolerance epsilon_max']:>24.6f}",f"{edge_data['Tolerance delta_max']:>24.6f}",f"{edge_data['Bounding procedure']:>24s}",f"{edge_data['Search']:>12s}",f"{edge_data['Number of solution boxes']:>24d}",f"{edge_data['Approximation includes S']:>24b}",f"{edge_data['Best incumbent']:>24s}",f"{edge_data['Best incumbent value']:>24.6f}",f"{edge_data['Iterations needed/done']:>24d}",f"{edge_data['Runtime [s]']:>12.6f}",f"{edge_data['Number of left boxes in W']:>28d}")
     else:
         if probe_count == 0:
             print("Restricted test problems - Data:")
@@ -437,10 +437,10 @@ BTP_list.append(["vincent",(vincent_func,vincent_grad,vincent_hess),vincent_X,[]
 #Parameter assignment
 #-----------------------------------------------
 epsilon_max_list = [0.5]*9
-bounding_procedure_list = [optimal_centerd_forms]*9
+bounding_procedure_list = [optimal_centered_forms]*9
 max_time_list = [240]*9
 
-fname = os.path.join(os.path.dirname(__file__), "../BTP_probe")
+fname = None #os.path.join(os.path.dirname(__file__), "../BTP_probe")
 
 
 #Code - Running the algorithm and collecting data
@@ -456,7 +456,7 @@ for j,BTP in enumerate(BTP_list):
     #Code je BTP
     #-----------------------------------------------
     #start = time.monotonic()
-    solution, y_best ,k ,t ,L = analysed_improved_boxres_BandB(func, X, bounding_procedure=bounding_procedure, grad=grad, hess=hess, epsilon=0, epsilon_max=epsilon_max, max_time=max_time, save_lists=False)
+    solution, y_best ,k ,t ,W = analysed_impfunc_boxres_BandB(func, X, bounding_procedure=bounding_procedure, grad=grad, hess=hess, epsilon=0, epsilon_max=epsilon_max, max_time=max_time, save_lists=False)
     #total_time = time.monotonic() - start
 
     solution_Boxes = [Oi[0] for Oi in solution]
@@ -474,7 +474,7 @@ for j,BTP in enumerate(BTP_list):
         edge_data["Best incumbent value"] = "-"
     edge_data["Iterations needed/done"] = k
     edge_data["Runtime [s]"] = t #total_time
-    edge_data["Number of subdivisions in L"] = len(L)
+    edge_data["Number of left boxes in W"] = len(W)
     
     try: 
         import pandas as pd
@@ -483,8 +483,8 @@ for j,BTP in enumerate(BTP_list):
     except:
         if probe_count == 0: 
             print("Boxrestricted test problems - Data:")
-            print(f"{' ':14s}",f"{'Tolerance epsilon_max':>24s}",f"{'Bounding procedure':>24s}",f"{'Search':>12s}",f"{'Number of solution boxes':>24s}",f"{'Approximation includes S':>24s}",f"{'Best incumbent':>24s}",f"{'Best incumbent value':>24s}",f"{'Iterations needed/done':>24s}",f"{'Runtime [s]':>12s}",f"{'Number of subdivisions in L':>28s}")
-        print(f"{BTP_title:14s}",f"{edge_data['Tolerance epsilon_max']:>24.6f}",f"{edge_data['Bounding procedure']:>24s}",f"{edge_data['Search']:>12s}",f"{edge_data['Number of solution boxes']:>24d}",f"{edge_data['Approximation includes S']:>24b}",f"{edge_data['Best incumbent']:>24s}",f"{edge_data['Best incumbent value']:>24.6f}",f"{edge_data['Iterations needed/done']:>24d}",f"{edge_data['Runtime [s]']:>12.6f}",f"{edge_data['Number of subdivisions in L']:>28d}")
+            print(f"{' ':14s}",f"{'Tolerance epsilon_max':>24s}",f"{'Bounding procedure':>24s}",f"{'Search':>12s}",f"{'Number of solution boxes':>24s}",f"{'Approximation includes S':>24s}",f"{'Best incumbent':>24s}",f"{'Best incumbent value':>24s}",f"{'Iterations needed/done':>24s}",f"{'Runtime [s]':>12s}",f"{'Number of left boxes in W':>28s}")
+        print(f"{BTP_title:14s}",f"{edge_data['Tolerance epsilon_max']:>24.6f}",f"{edge_data['Bounding procedure']:>24s}",f"{edge_data['Search']:>12s}",f"{edge_data['Number of solution boxes']:>24d}",f"{edge_data['Approximation includes S']:>24b}",f"{edge_data['Best incumbent']:>24s}",f"{edge_data['Best incumbent value']:>24.6f}",f"{edge_data['Iterations needed/done']:>24d}",f"{edge_data['Runtime [s]']:>12.6f}",f"{edge_data['Number of left boxes in W']:>28d}")
     else:
         if probe_count == 0:
             print("Boxrestricted test problems - Data:")

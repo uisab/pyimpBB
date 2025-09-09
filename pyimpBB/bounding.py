@@ -5,7 +5,7 @@ from scipy.optimize import minimize, Bounds
 from pyimpBB.helper import obvec, intvec, obmat
 from typing import Callable, Union
 
-def optimal_centerd_forms(func: Callable[[obvec], float], grad: Callable[[obvec],obvec], hess, X: intvec, direction: str="lower") -> obvec:
+def optimal_centered_forms(func: Callable[[obvec], float], grad: Callable[[obvec],obvec], hess, X: intvec, direction: str="lower") -> obvec:
     """Uses optimal centered forms to return an upper or lower bound 
     of the real function 'func' on the interval-vector 'X' in the form of an object-vector.
     The arguments have to be a python function 'func', whose bounds are to be determined, 
@@ -44,7 +44,7 @@ def optimal_centerd_forms(func: Callable[[obvec], float], grad: Callable[[obvec]
     else:
         raise ValueError("direction "+str(direction)+" is not supported, try 'lower' or 'upper'")
     
-def centerd_forms(func: Callable[[obvec],Union[float,obvec]], grad: Callable[[obvec],Union[obvec,obmat]], hess, X: intvec, direction: str="lower") -> obvec:
+def centered_forms(func: Callable[[obvec],Union[float,obvec]], grad: Callable[[obvec],Union[obvec,obmat]], hess, X: intvec, direction: str="lower") -> obvec:
     """Uses centered forms to return an upper or lower bound 
     of the real potentially vector-valued function 'func' on the interval-vector 'X' in the form of an object-vector. 
     The arguments have to be a python function 'func', whose bounds are to be determined, 

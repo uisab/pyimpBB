@@ -2,8 +2,8 @@
 
 This package provides the implementation of a novel branch-and-bound algorithm for the outer approximation 
 of all global minimal points of a nonlinear constrained optimization problem using the improvement function, 
-internally referred to as 'improved_BandB', to the corresponding publication 'The improvement function in 
-branch-and-bound methods for complete global optimization' by P. Kirst, M. Rodestock, S. Schwarze and O. Stein. 
+internally referred to as 'impfunc_BandB', to the corresponding publication 'The improvement function in 
+branch-and-bound methods for complete global optimization' by S. Schwarze, O. Stein, P. Kirst and M. Rodestock.
 
 ## Installation:
 The easiest and yet preferred way to install this package is to use <kbd>pip</kbd>. 
@@ -76,7 +76,7 @@ use <kbd>help(<module/class/function name>)</kbd>.
                 vector-valued function 'func' on the interval-vector 'X' in the form of an object-vector.</td>
         </tr>
          <tr>
-            <td valign="top">optimal_centerd_forms(func, grad, hess, X, direction)</td>
+            <td valign="top">optimal_centered_forms(func, grad, hess, X, direction)</td>
             <td valign="top">Uses optimal centered forms to return an upper or lower bound of the real 
                 function 'func' on the interval-vector 'X' in the form of an object-vector.</td>
         </tr>
@@ -87,31 +87,31 @@ use <kbd>help(<module/class/function name>)</kbd>.
         </tr>
         <tr>
             <td rowspan=4 align="left" valign="top">solver</td>
-            <td valign="top">improved_BandB(func, cons, X, bounding_procedure, grad=None, hess=None, cons_grad=[], 
+            <td valign="top">impfunc_BandB(func, cons, X, bounding_procedure, grad=None, hess=None, cons_grad=[], 
                 cons_hess=[], epsilon=0, delta=0, epsilon_max=0.5, delta_max=0.5, max_iter=2500)</td>
             <td valign="top">Uses the improvement function in the course of a branch-and-bound approach to 
                 provide an enclosure of the solution set of a nonlinear constrained optimization problem 
                 with a given accuracy.</td>
         </tr>
         <tr>
-            <td valign="top">analysed_improved_BandB(func, cons, X, bounding_procedure, grad=None, hess=None, 
+            <td valign="top">analysed_impfunc_BandB(func, cons, X, bounding_procedure, grad=None, hess=None, 
                 cons_grad=[], cons_hess=[], epsilon=0, delta=0, epsilon_max=0.5, delta_max=0.5, search_ratio=0, 
                 max_time=60, save_lists=True)</td>
-            <td valign="top">A variation of 'improved_BandB' that provides mixed breadth-depth-first search, 
+            <td valign="top">A variation of 'impfunc_BandB' that provides mixed breadth-depth-first search, 
                 a numerically useful second termination condition and collects additional data generally 
                 and optionally per iteration to support subsequent analysis of the approximation progress and results.</td>
         </tr>
         <tr>
-            <td valign="top">improved_boxres_BandB(func, X, bounding_procedure, grad=None, hess=None, epsilon=0, 
+            <td valign="top">impfunc_boxres_BandB(func, X, bounding_procedure, grad=None, hess=None, epsilon=0, 
                 epsilon_max=0.5, max_iter=2500)</td>
             <td valign="top">Uses the improvement function in the course of a branch-and-bound approach to 
                 provide an enclosure of the solution set of a nonlinear box-constrained optimization problem 
                 with a given accuracy.</td>
         </tr>
         <tr>
-            <td valign="top">analysed_improved_boxres_BandB(func, X, bounding_procedure, grad=None, hess=None, 
+            <td valign="top">analysed_impfunc_boxres_BandB(func, X, bounding_procedure, grad=None, hess=None, 
                 epsilon=0, epsilon_max=0.5, search_ratio=0, max_time=60, save_lists=True)</td>
-            <td valign="top">A variation of 'improved_boxres_BandB' that provides mixed breadth-depth-first search, 
+            <td valign="top">A variation of 'impfunc_boxres_BandB' that provides mixed breadth-depth-first search, 
                 a numerically useful second termination condition and collects additional data generally 
                 and optionally per iteration to support subsequent analysis of the approximation progress and results.</td>
         </tr>
@@ -145,7 +145,7 @@ with nonempty box $X := ([0,4],[0,4])^\intercal \subseteq \mathbb{I}\negthinspac
 differentiable functions $f,\omega_i: \mathbb{R}^2 \rightarrow \mathbb{R}, i \in \lbrace 1, \ldots, 4\rbrace$ 
 defined as
 
-$$f(x) := x_1 + x_2,$$ 
+$$f(x) := x_1 + x_2,$$
 $$\omega_1(x) := -(x_1^2 + x_2^2) +6.5, \quad \omega_3(x) := x_1 -x_2 -2,$$
 $$\omega_2(x) := -x_1 +x_2 -2, \qquad\negthickspace \omega_4(x) := x_1^2 +x_2^2 -16.$$
 
@@ -236,7 +236,7 @@ their differentiability requirements.
             <td valign="top">False</td>
         </tr>
          <tr>
-            <td valign="top">optimal_centerd_forms(func, grad, hess, X, direction)</td>
+            <td valign="top">optimal_centered_forms(func, grad, hess, X, direction)</td>
             <td valign="top">True</td>
             <td valign="top">False</td>
         </tr>
@@ -249,19 +249,19 @@ their differentiability requirements.
 </table>
 
 In order to be able to apply the algorithm designed for such problems in the form of the function 
-<kbd>analysed_improved_BandB()</kbd> from the module <kbd>pyimpBB.solver</kbd> with a selected bound operation, such as 
+<kbd>analysed_impfunc_BandB()</kbd> from the module <kbd>pyimpBB.solver</kbd> with a selected bound operation, such as 
 <kbd>aBB_relaxation()</kbd>, it is still necessary to specify certain accuracies with regard to the feasibility 
 (delta, delta_max) and optimality (epsilon, epsilon_max) of the solution as well as to define three auxiliary 
 variables in the form of lists for clear transfer.
 
     from pyimpBB.bounding import aBB_relaxation
-    from pyimpBB.solver import analysed_improved_BandB
+    from pyimpBB.solver import analysed_impfunc_BandB
 
     cons = [omega_1,omega_2,omega_3,omega_4]
     cons_grad = [omega_1_grad,omega_2_grad,omega_3_grad,omega_4_grad]
     cons_hess = [omega_1_hess,omega_2_hess,omega_3_hess,omega_4_hess]
 
-    solution, y_best, k, t, save = analysed_improved_BandB(func, cons, X, bounding_procedure=aBB_relaxation, grad=grad, hess=hess, cons_grad=cons_grad, cons_hess=cons_hess)
+    solution, y_best, k, t, save = analysed_impfunc_BandB(func, cons, X, bounding_procedure=aBB_relaxation, grad=grad, hess=hess, cons_grad=cons_grad, cons_hess=cons_hess)
 
 The return of this function consists of the actual solution of the algorithm as a list of <kbd>intvec</kbd>, 
 the best incumbent found during the procedure as an <kbd>obvec</kbd>, the number of iterations required as an integer, 
@@ -270,13 +270,13 @@ which documents the approximation progress of the algorithm for each iteration. 
 <kbd>iterations_in_decision_space_plot</kbd> and <kbd>iterations_in_objective_space_plot</kbd> from the module 
 <kbd>pyimpBB.analyzing</kbd> this progress can be displayed graphically, with both having an extensive range 
 of options for influencing the resulting graphic. To use these functions, the data to be displayed must be extracted 
-from the return of the function <kbd>analysed_improved_BandB()</kbd> as a dictionary with the iterations as keys and 
+from the return of the function <kbd>analysed_impfunc_BandB()</kbd> as a dictionary with the iterations as keys and 
 a selection of the iterations to be displayed as a list.
 
     from pyimpBB.analyzing import iterations_in_decision_space_plot
 
-    data = dict(zip(save.keys(),[[Oi[0] for Oi in save[k][0]] for k in save]))
-    iterations = list(data.keys())[::round(k/3)]
+    data = dict(zip(save.keys(),[[Oi[0] for Oi in save[k][0]]+[Wi[0] for Wi in save[k][1]] for k in save]))
+    iterations = [0,round(1/3*k),round(2/3*k),k]
     
     iterations_in_decision_space_plot(func,X,data,iterations,cons=cons,columns=2,levels=[3,3.5],figsize=(8,6),facecolor="white")
 
@@ -288,14 +288,14 @@ and $v$ + epsilon_max (red) and the iterative approximation progress of the algo
 are clearly visible. However, since such a graphical view of the results only proves to be useful for 
 two-dimensional problems, the corresponding functions can only be applied to these. 
 At the end of this example, for the theoretical background, reference is made to the already mentioned 
-publication 'The improvement function in branch-and-bound methods for complete global optimization' by P. Kirst, 
-M. Rodestock, S. Schwarze and O. Stein.
+publication 'The improvement function in branch-and-bound methods for complete global optimization' by S. Schwarze, 
+O. Stein, P. Kirst and M. Rodestock.
 
 ## Miscellaneous
-This package was created as part of a master thesis ('Analysis of a branch-and-bound method for nonlinear 
-constrained optimization problems' by M. Rodestock) and we strive to provide a high-quality presentation to 
+This package was created as part of a master thesis ('Analysis of a Branch-and-Bound Method for Complete Global 
+Optimization of Nonlinear Constrained Problems' by M. Rodestock) and we strive to provide a high-quality presentation to 
 the best of our knowledge and belief. However, the author assumes no responsibility for the use of this package 
 in any context. If you have suggestions for improvement or requests, the author asks for your understanding 
 if he tends not to comply with them in the long term. Otherwise, enjoy this little package!
 
-(written on 14.04.2025)
+(written on 09.09.2025)
