@@ -5,8 +5,8 @@ from scipy.optimize import minimize, Bounds
 from pyimpBB.helper import obvec, intvec, obmat
 from typing import Callable, Union
 
-def optimal_centered_forms(func: Callable[[obvec], float], grad: Callable[[obvec],obvec], hess, X: intvec, direction: str="lower") -> intvec:
-    """Uses optimal centered forms to return an upper or lower bound of the real potentially 
+def optimal_centered_forms(func: Callable[[obvec], float], grad: Callable[[obvec],obvec], hess, X: intvec) -> intvec:
+    """Uses optimal centered forms to return an upper and lower bound of the real potentially 
     vector-valued function 'func' on the interval-vector 'X' in the form of an enclosing interval.
     The arguments have to be a python function 'func', whose bounds are to be determined, 
     a python function 'grad', which corresponds to the gradient or first derivative of 'func', 
@@ -32,8 +32,8 @@ def optimal_centered_forms(func: Callable[[obvec], float], grad: Callable[[obvec
         upper_bounds = [upper_bounds]
     return intvec(obmat([intvec(lower_bounds).inf,intvec(upper_bounds).sup]).T)
     
-def centered_forms(func: Callable[[obvec],Union[float,obvec]], grad: Callable[[obvec],Union[obvec,obmat]], hess, X: intvec, direction: str="lower") -> intvec:
-    """Uses centered forms to return an upper or lower bound of the real potentially 
+def centered_forms(func: Callable[[obvec],Union[float,obvec]], grad: Callable[[obvec],Union[obvec,obmat]], hess, X: intvec) -> intvec:
+    """Uses centered forms to return an upper and lower bound of the real potentially 
     vector-valued function 'func' on the interval-vector 'X' in the form of an enclosing interval.
     The arguments have to be a python function 'func', whose bounds are to be determined, 
     a python function 'grad', which corresponds to the gradient or first derivative of 'func', 
@@ -70,8 +70,8 @@ def aBB_relaxation(func: Callable[[obvec],float], grad: Callable[[obvec],obvec],
     ub = -(res_ub.fun -1e-9) if res_ub.success else np.inf #func(res_ub.x) + (alpha/2)*(X.inf -obvec(res_ub.x))@(X.sup -obvec(res_ub.x))
     return intvec([[lb,ub]])
 
-def direct_intervalarithmetic(func: Callable[[obvec],float], grad, hess, X: intvec, direction: str="lower") -> intvec:
-    """Uses pur interval arithmetic to return an upper or lower bound of the real potentially 
+def direct_intervalarithmetic(func: Callable[[obvec],float], grad, hess, X: intvec) -> intvec:
+    """Uses pur interval arithmetic to return an upper and lower bound of the real potentially 
     vector-valued function 'func' on the interval-vector 'X' in the form of an enclosing interval.
     The arguments have to be a python function 'func', whose bounds are to be determined, 
     two unused placeholder 'grad' as well as 'hess' and a intvec 'X' as space restriction."""

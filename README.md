@@ -66,24 +66,24 @@ use <kbd>help(<module/class/function name>)</kbd>.
         </tr>
         <tr>
             <td rowspan=4 align="left" valign="top">bounding</td>
-            <td valign="top">direct_intervalarithmetic(func, grad, hess, X, direction)</td>
-            <td valign="top">Uses pur interval arithmetic to return an upper or lower bound of the real 
-                function 'func' on the interval-vector 'X' in the form of an object-vector.</td>
+            <td valign="top">direct_intervalarithmetic(func, grad, hess, X)</td>
+            <td valign="top">Uses pur interval arithmetic to return an upper and lower bound of the real potentially 
+                vector-valued function 'func' on the interval-vector 'X' in the form of an enclosing interval.</td>
         </tr>
          <tr>
-            <td valign="top">centered_forms(func, grad, hess, X, direction)</td>
-            <td valign="top">Uses centered forms to return an upper or lower bound of the real potentially 
-                vector-valued function 'func' on the interval-vector 'X' in the form of an object-vector.</td>
+            <td valign="top">centered_forms(func, grad, hess, X)</td>
+            <td valign="top">Uses centered forms to return an upper and lower bound of the real potentially 
+                vector-valued function 'func' on the interval-vector 'X' in the form of an enclosing interval.</td>
         </tr>
          <tr>
-            <td valign="top">optimal_centered_forms(func, grad, hess, X, direction)</td>
-            <td valign="top">Uses optimal centered forms to return an upper or lower bound of the real 
-                function 'func' on the interval-vector 'X' in the form of an object-vector.</td>
+            <td valign="top">optimal_centered_forms(func, grad, hess, X)</td>
+            <td valign="top">Uses optimal centered forms to return an upper and lower bound of the real potentially 
+                vector-valued function 'func' on the interval-vector 'X' in the form of an enclosing interval.</td>
         </tr>
          <tr>
-            <td valign="top">aBB_relaxation(func, grad, hess, X, direction)</td>
-            <td valign="top">Uses konvex relaxation via aBB method to return an upper or lower bound of the real 
-                function 'func' on the interval-vector 'X' in the form of an object-vector.</td>
+            <td valign="top">aBB_relaxation(func, grad, hess, X)</td>
+            <td valign="top">Uses konvex relaxation via aBB method to return an upper and lower bound of the real 
+                function 'func' on the interval-vector 'X' in the form of an enclosing interval.</td>
         </tr>
         <tr>
             <td rowspan=4 align="left" valign="top">solver</td>
@@ -226,22 +226,22 @@ their differentiability requirements.
     </thead>
     <tbody>
         <tr>
-            <td valign="top">direct_intervalarithmetic(func, grad, hess, X, direction)</td>
+            <td valign="top">direct_intervalarithmetic(func, grad, hess, X)</td>
             <td valign="top">False</td>
             <td valign="top">False</td>
         </tr>
          <tr>
-            <td valign="top">centered_forms(func, grad, hess, X, direction)</td>
+            <td valign="top">centered_forms(func, grad, hess, X)</td>
             <td valign="top">True</td>
             <td valign="top">False</td>
         </tr>
          <tr>
-            <td valign="top">optimal_centered_forms(func, grad, hess, X, direction)</td>
+            <td valign="top">optimal_centered_forms(func, grad, hess, X)</td>
             <td valign="top">True</td>
             <td valign="top">False</td>
         </tr>
          <tr>
-            <td valign="top">aBB_relaxation(func, grad, hess, X, direction)</td>
+            <td valign="top">aBB_relaxation(func, grad, hess, X)</td>
             <td valign="top">True</td>
             <td valign="top">True</td>
         </tr>
